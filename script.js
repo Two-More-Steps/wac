@@ -128,12 +128,15 @@ window.addEventListener('resize', updateBodyPadding);
 
 function enableGraffitiCursorEffect() {
   // ✅ 모바일 환경에서는 작동하지 않음
-  if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return;
+  if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userUser)) return;
 
-  // ✅ 모든 요소 커서 완전 숨김
-  const style = document.createElement('style');
-  style.innerHTML = `* { cursor: none !important; }`;
-  document.head.appendChild(style);
+  // ✅ 모든 요소 커서 완전 숨김 (한 번만 실행)
+  if (!document.getElementById('graffiti-cursor-style')) {
+    const style = document.createElement('style');
+    style.id = 'graffiti-cursor-style';
+    style.innerHTML = `* { cursor: none !important; }`;
+    document.head.appendChild(style);
+  }
 
   // ✅ 캔버스 생성
   const canvas = document.createElement('canvas');
@@ -150,104 +153,197 @@ function enableGraffitiCursorEffect() {
   document.body.appendChild(canvas);
 
   const ctx = canvas.getContext('2d');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  let devicePixelRatio = window.devicePixelRatio || 1;
 
+  // 캔버스 크기 설정 함수
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * devicePixelRatio;
+    canvas.height = rect.height * devicePixelRatio;
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+  }
+  resizeCanvas();
+
+  // 상태 변수들
   let mousePos = { x: 0, y: 0 };
   let particles = [];
-  let lastTimestamp = 0;
+  let lastParticleTime = 0;
+  let lastFrameTime = 0;
   let hoverPointerElement = false;
+  let isAnimating = true;
 
-  const PARTICLE_LIFETIME = 0.15;
-  const PARTICLE_DECAY = 1.0 / (PARTICLE_LIFETIME * 60);
-  const PARTICLE_INTERVAL = 12;
-  const PARTICLE_COUNT = 30;
+  // 성능 최적화 상수
+  const PARTICLE_LIFETIME = 150; // ms로 변경
+  const PARTICLE_INTERVAL = 16;  // ~60fps
+  const PARTICLE_COUNT = 20;     // 파티클 수 감소
+  const MAX_PARTICLES = 300;     // 최대 파티클 수 제한
 
-  // 🎨 팝아트 색감 팔레트
+  // 🎨 팝아트 색감 팔레트 (미리 컴파일된 색상)
   const palette = ['#FF0033', '#FFD700', '#0055FF', '#FF00AA', '#00CFFF', '#FFFFFF'];
 
-  function setPosition(e) {
-    return {
-      x: e.clientX || 0,
-      y: e.clientY || 0
-    };
+  // 오브젝트 풀링을 위한 파티클 풀
+  const particlePool = [];
+  for (let i = 0; i < MAX_PARTICLES; i++) {
+    particlePool.push({
+      x: 0, y: 0, radius: 0, alpha: 0, life: 0,
+      startTime: 0, color: '', active: false
+    });
   }
 
-  function addParticles(pos) {
+  function getPooledParticle() {
+    for (let i = 0; i < particlePool.length; i++) {
+      if (!particlePool[i].active) {
+        return particlePool[i];
+      }
+    }
+    return null; // 풀이 가득 찬 경우
+  }
+
+  function addParticles(pos, currentTime) {
     const isHover = hoverPointerElement;
-    const count = isHover ? PARTICLE_COUNT * 0.5 : PARTICLE_COUNT;
+    const count = isHover ? Math.floor(PARTICLE_COUNT * 0.7) : PARTICLE_COUNT;
 
     for (let i = 0; i < count; i++) {
-      const angle = Math.random() * 2 * Math.PI;
+      const particle = getPooledParticle();
+      if (!particle) break; // 풀이 가득 찬 경우 중단
 
+      const angle = Math.random() * 6.28318; // 2 * Math.PI 미리 계산
       const distance = isHover
-        ? (1 + Math.random()) * 32        // 확 퍼지게 (32 ~ 64px)
-        : Math.pow(Math.random(), 2) * 16; // 기본 (0 ~ 16px)
-
+        ? (1 + Math.random()) * 24        // 살짝 줄임
+        : Math.pow(Math.random(), 2) * 12; // 살짝 줄임
       const radius = isHover
-        ? (Math.random() * 2 + 2.5)       // 큼직하게 (2.5 ~ 4.5px)
-        : (Math.random() * 2 + 0.5);      // 기본 (0.5 ~ 2.5px)
+        ? (Math.random() * 1.5 + 2)       // 살짝 줄임
+        : (Math.random() * 1.5 + 0.5);    // 살짝 줄임
 
       const offsetX = Math.cos(angle) * distance;
       const offsetY = Math.sin(angle) * distance;
 
-      particles.push({
-        x: pos.x + offsetX,
-        y: pos.y + offsetY,
-        radius: radius,
-        alpha: 1.0,
-        life: 1.0,
-        decay: PARTICLE_DECAY
-      });
+      // 파티클 초기화
+      particle.x = pos.x + offsetX;
+      particle.y = pos.y + offsetY;
+      particle.radius = radius;
+      particle.startTime = currentTime;
+      particle.color = palette[Math.floor(Math.random() * palette.length)];
+      particle.active = true;
     }
   }
 
-  function paint() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles = particles.filter((p, index) => {
-      p.life -= p.decay;
-      if (p.life <= 0) return false;
+  function paint(currentTime) {
+    if (!isAnimating) return;
 
-      const color = palette[index % palette.length];
+    // FPS 제한 (60fps)
+    if (currentTime - lastFrameTime < 16.67) {
+      requestAnimationFrame(paint);
+      return;
+    }
+    lastFrameTime = currentTime;
+
+    ctx.clearRect(0, 0, canvas.width / devicePixelRatio, canvas.height / devicePixelRatio);
+
+    let activeParticles = 0;
+
+    // 파티클 렌더링 및 수명 관리
+    for (let i = 0; i < particlePool.length; i++) {
+      const p = particlePool[i];
+      if (!p.active) continue;
+
+      const age = currentTime - p.startTime;
+      if (age > PARTICLE_LIFETIME) {
+        p.active = false; // 파티클 비활성화
+        continue;
+      }
+
+      activeParticles++;
+
+      // 알파 계산 (수명에 따른 페이드아웃)
+      const alpha = 1 - (age / PARTICLE_LIFETIME);
+
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = p.color;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fillStyle = color;
-      ctx.shadowBlur = 0;
+      ctx.arc(p.x, p.y, p.radius, 0, 6.28318); // 2 * Math.PI 미리 계산
       ctx.fill();
-      return true;
-    });
-    requestAnimationFrame(paint);
+    }
+
+    ctx.globalAlpha = 1; // 알파 리셋
+
+    // 활성 파티클이 없으면 애니메이션 일시 정지
+    if (activeParticles === 0 && currentTime - lastParticleTime > 100) {
+      // 100ms 후에도 파티클이 없으면 잠시 대기
+      setTimeout(() => requestAnimationFrame(paint), 50);
+    } else {
+      requestAnimationFrame(paint);
+    }
   }
 
-  function update(timestamp) {
-    if (timestamp - lastTimestamp > PARTICLE_INTERVAL) {
-      addParticles(mousePos);
-      lastTimestamp = timestamp;
+  function update(currentTime) {
+    if (currentTime - lastParticleTime > PARTICLE_INTERVAL) {
+      addParticles(mousePos, currentTime);
+      lastParticleTime = currentTime;
     }
     requestAnimationFrame(update);
   }
 
+  // 쓰로틀링된 마우스 이벤트 핸들러
+  let mouseMoveTimeout;
   function handleMouseMove(e) {
-    mousePos = setPosition(e);
+    mousePos.x = e.clientX;
+    mousePos.y = e.clientY;
 
-    const el = document.elementFromPoint(mousePos.x, mousePos.y);
-    const pointerLike =
-      getComputedStyle(el).cursor === 'pointer' ||
-      el.closest('a, button, [role="button"]');
-
-    hoverPointerElement = !!pointerLike;
+    // 호버 상태 확인을 쓰로틀링
+    if (mouseMoveTimeout) return;
+    mouseMoveTimeout = setTimeout(() => {
+      const el = document.elementFromPoint(mousePos.x, mousePos.y);
+      if (el) {
+        const computedStyle = window.getComputedStyle(el);
+        const pointerLike = computedStyle.cursor === 'pointer' ||
+          el.closest('a, button, [role="button"], input, select, textarea');
+        hoverPointerElement = !!pointerLike;
+      }
+      mouseMoveTimeout = null;
+    }, 10);
   }
 
-  window.addEventListener('mousemove', handleMouseMove);
-  window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  });
+  // 리사이즈 이벤트 쓰로틀링
+  let resizeTimeout;
+  function handleResize() {
+    if (resizeTimeout) return;
+    resizeTimeout = setTimeout(() => {
+      resizeCanvas();
+      resizeTimeout = null;
+    }, 100);
+  }
+
+  // 페이지 가시성 API로 성능 최적화
+  function handleVisibilityChange() {
+    isAnimating = !document.hidden;
+    if (isAnimating) {
+      requestAnimationFrame(paint);
+      requestAnimationFrame(update);
+    }
+  }
+
+  // 이벤트 리스너 등록
+  window.addEventListener('mousemove', handleMouseMove, { passive: true });
+  window.addEventListener('resize', handleResize, { passive: true });
+  document.addEventListener('visibilitychange', handleVisibilityChange);
 
   // ⏯️ 시작
-  paint();
+  requestAnimationFrame(paint);
   requestAnimationFrame(update);
-}
 
+  // 정리 함수 반환
+  return function cleanup() {
+    isAnimating = false;
+    window.removeEventListener('mousemove', handleMouseMove);
+    window.removeEventListener('resize', handleResize);
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+    canvas.remove();
+    const style = document.getElementById('graffiti-cursor-style');
+    if (style) style.remove();
+  };
+}
 
 enableGraffitiCursorEffect();
