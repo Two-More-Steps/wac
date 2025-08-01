@@ -5,6 +5,9 @@ section#intro article {
 section .row {
   color: #fff;
 }
+section .row .column .inner {
+  background: none;
+}
 section#intro {
   height: auto;
   border-bottom: 1px solid #010b13;
@@ -172,6 +175,7 @@ section .more_btn_type01 {
 }
 section#about_us .row .about_p h2 {
   border: 1px solid #1e1e1e;
+  color: #010b13;
   padding: 32px;
   width: fit-content;
   transform: translate(0, 0) rotate(0);
@@ -258,8 +262,23 @@ section {
 
 table.curriculum_table tr td:last-child,
 .col_box .column .col_last p {
-  color: #ababab;
+  color: #e4e4e4;
 }
 section .wrap > table tr td:first-child {
   color: #fff;
+  border-bottom-color: #fff;
+}
+section#notice .row .right.notice .column .inner a h3 {
+  color: #e4e4e4;
+}
+
+section#about_us .row .inner .article span {
+  color: #e4e4e4;
+}
+
+section .more_btn_type01 svg rect.more_btn_svg_rect {
+  fill: #010b13;
+}
+section .more_btn_type01 {
+  color: #010b13;
 }
