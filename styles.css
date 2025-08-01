@@ -276,9 +276,11 @@ section#about_us .row .inner .article span {
   color: #e4e4e4;
 }
 
-section .more_btn_type01 svg rect.more_btn_svg_rect {
+section .more_btn_type01 svg rect.more_btn_svg_rect,
+section .more_btn_type01:hover svg rect.more_btn_svg_rect {
   fill: #010b13;
 }
-section .more_btn_type01 {
+section .more_btn_type01,
+section .more_btn_type01:hover {
   color: #010b13;
 }
