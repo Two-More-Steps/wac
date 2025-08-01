@@ -90,9 +90,15 @@ window.addEventListener('resize', function () {
   setupMarquee('.tms-floatingbar2', 'marquee2');
 });
 
-const linkEl = document.createElement('link');
-linkEl.rel = 'stylesheet';
-linkEl.href = 'https://two-more-steps.github.io/wac/styles.css';
+// const linkEl = document.createElement('link');
+// linkEl.rel = 'stylesheet';
+// linkEl.href = 'https://two-more-steps.github.io/wac/styles.css';
 
-// head의 마지막 자식으로 삽입
-document.head.appendChild(linkEl);
+// // head의 마지막 자식으로 삽입
+// document.head.appendChild(linkEl);
+
+
+
+window.addEventListener('DOMContentLoaded', () => {
+  document.body.classList.add('loaded');
+});
