@@ -21,9 +21,9 @@ newElement.innerHTML = `
   <div class="tms-floatingbar-container">
 	<div class="tms-floatingbar">
 	  <div class="tms-floatingbar-content">
-		<span class="italic">Imagination that crosses boundaries, stories that move the frame. Webtoon Anime Creation.</span> 
-		<span class="bold">Imagination that crosses boundaries, stories that move the frame. Webtoon Anime Creation.</span> 
-		<span>Imagination that crosses boundaries, stories that move the frame. Webtoon Anime Creation.</span>
+		<span class="italic">WAC - Webtoon Anime Creation.</span> 
+		<span class="bold">WAC - Webtoon Anime Creation.</span> 
+		<span>WAC - Webtoon Anime Creation.</span>
 	  </div>
 	</div>
   </div>
@@ -31,9 +31,9 @@ newElement.innerHTML = `
   <div class="tms-floatingbar-container2">
 	<div class="tms-floatingbar2">
 	  <div class="tms-floatingbar-content2">
-		<span class="italic">Imagination that crosses boundaries, stories that move the frame. Webtoon Anime Creation.</span> 
-		<span class="bold">Imagination that crosses boundaries, stories that move the frame. Webtoon Anime Creation.</span> 
-		<span>Imagination that crosses boundaries, stories that move the frame. Webtoon Anime Creation.</span>
+		<span class="italic">WAC - Webtoon Anime Creation.</span> 
+		<span class="bold">WAC - Webtoon Anime Creation.</span> 
+		<span>WAC - Webtoon Anime Creation.</span>
 	  </div>
 	</div>
   </div>
