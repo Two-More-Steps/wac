@@ -127,7 +127,6 @@ window.addEventListener('resize', updateBodyPadding);
 
 
 function enableGraffitiCursorEffect() {
-  // 모바일 환경에서는 실행 안 함
   if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return;
 
   const canvas = document.createElement('canvas');
@@ -167,11 +166,12 @@ function enableGraffitiCursorEffect() {
   }
 
   function addParticles(pos) {
-    const scale = hoverPointerElement ? 2 : 1;
+    const scale = 1;
+    const count = hoverPointerElement ? PARTICLE_COUNT * 0.3 : PARTICLE_COUNT;
 
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
+    for (let i = 0; i < count; i++) {
       const angle = Math.random() * 2 * Math.PI;
-      const distance = Math.pow(Math.random(), 2) * 16 * scale;
+      const distance = (0.4 + Math.pow(Math.random(), 2) * 0.6) * 16; // 중심 피해서 퍼짐
       const offsetX = Math.cos(angle) * distance;
       const offsetY = Math.sin(angle) * distance;
 
@@ -196,10 +196,8 @@ function enableGraffitiCursorEffect() {
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
       ctx.fillStyle = `hsla(${hue}, 100%, 70%, ${p.alpha})`;
-      ctx.shadowBlur = 10 * p.radius;
-      ctx.shadowColor = `hsla(${hue}, 100%, 70%, ${p.alpha})`;
-      ctx.fill();
       ctx.shadowBlur = 0;
+      ctx.fill();
       return true;
     });
     requestAnimationFrame(paint);
