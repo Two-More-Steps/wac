@@ -221,21 +221,11 @@ aside.bottom_btn {
   width: auto;
   transform: none;
 }
-
-#header nav#gnb {
-  transform: translateY(-100%);
-  transition: 0.3s ease;
-}
 body {
-  padding: 0;
   transition: 0.3s ease;
 }
 body.loaded {
   padding-top: 70px;
   opacity: 1;
   display: block;
-}
-
-body.loaded #header nav#gnb {
-  transform: translateY(0);
 }
