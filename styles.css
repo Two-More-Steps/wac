@@ -188,7 +188,7 @@ section#about_us .row .about_p h2 {
   padding: 32px;
   width: fit-content;
   transform: translate(0, 0) rotate(0);
-  transition: 0.3s ease all;
+  transition: 0.3s ease transform;
   background: #fff;
   margin: 0 auto;
   text-align: center;
@@ -202,6 +202,7 @@ section#title .text_wrap {
   bottom: initial;
   top: 50%;
   transform: translate(-50%, -50%);
+  margin-top: -35px;
 }
 section#title {
   aspect-ratio: 1920/420;
@@ -220,9 +221,6 @@ aside.bottom_btn {
   bottom: 64px;
   width: auto;
   transform: none;
-}
-body {
-  transition: 0.3s ease;
 }
 body.loaded {
   padding-top: 70px;
