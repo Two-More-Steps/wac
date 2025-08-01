@@ -1,14 +1,18 @@
 const logoUrl = "https://two-more-steps.github.io/wac/logo.svg";
 const wacUrl = "https://academics.cu.ac.kr/home/detail/design/dcuwac/";
 
-const link = document.querySelector(".wrap_m_m > a");
-if (link) {
-  link.href = wacUrl;
-  const img = link.querySelector("img");
-  if (img) {
-    img.src = logoUrl;
-  }
+// 공통 처리 함수
+function updateLogoAndLink(selector) {
+  const anchor = document.querySelector(selector);
+  if (!anchor) return;
+  anchor.href = wacUrl;
+  const img = anchor.querySelector('img');
+  if (img) img.src = logoUrl;
 }
+
+// 대상 링크들에 대해 반복 적용
+updateLogoAndLink(".wrap_m_m > a");
+updateLogoAndLink("#header > a");
 
 document.querySelectorAll('section#activity .row .item a').forEach(el => {
   el.textContent = 'View more';
@@ -93,12 +97,30 @@ window.addEventListener('resize', function () {
 const linkEl = document.createElement('link');
 linkEl.rel = 'stylesheet';
 linkEl.href = 'https://two-more-steps.github.io/wac/styles.css';
+// linkEl.href = 'http://127.0.0.1:5500/styles.css';
+
 
 // head의 마지막 자식으로 삽입
 document.head.appendChild(linkEl);
 
 
 
-window.addEventListener('DOMContentLoaded', () => {
-  document.body.classList.add('loaded');
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.body.classList.add('loaded');
+  }, 100); // 1000ms = 1초
 });
+
+
+function updateBodyPadding() {
+  const header = document.querySelector('#header');
+  if (!header) return;
+  const headerHeight = header.offsetHeight;
+  document.body.style.paddingTop = `${headerHeight}px`;
+}
+
+// 페이지 로드 후 적용
+window.addEventListener('load', updateBodyPadding);
+
+// 리사이즈 시에도 다시 계산
+window.addEventListener('resize', updateBodyPadding);
