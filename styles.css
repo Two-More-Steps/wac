@@ -236,3 +236,7 @@ body {
 body.loaded {
   padding: 70px;
 }
+
+body.loaded #header nav#gnb {
+  transform: translateY(0);
+}
