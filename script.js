@@ -127,8 +127,15 @@ window.addEventListener('resize', updateBodyPadding);
 
 
 function enableGraffitiCursorEffect() {
+  // ✅ 모바일 환경에서는 작동하지 않음
   if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return;
 
+  // ✅ 모든 요소 커서 숨김
+  const style = document.createElement('style');
+  style.innerHTML = `* { cursor: none !important; }`;
+  document.head.appendChild(style);
+
+  // ✅ 캔버스 생성
   const canvas = document.createElement('canvas');
   canvas.id = 'graffitiCanvas';
   canvas.style.cssText = `
@@ -141,8 +148,6 @@ function enableGraffitiCursorEffect() {
     pointer-events: none;
   `;
   document.body.appendChild(canvas);
-
-  document.body.style.cursor = 'none'; // 커서 항상 숨김
 
   const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth;
@@ -158,6 +163,9 @@ function enableGraffitiCursorEffect() {
   const PARTICLE_INTERVAL = 12;
   const PARTICLE_COUNT = 30;
 
+  // 🎨 팝아트 스타일 팔레트
+  const palette = ['#FF0033', '#FFD700', '#0055FF', '#FF00AA', '#00CFFF', '#FFFFFF'];
+
   function setPosition(e) {
     return {
       x: e.clientX || 0,
@@ -172,7 +180,7 @@ function enableGraffitiCursorEffect() {
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * 2 * Math.PI;
 
-      // 중심 비움: hover일 때만
+      // 중심 비우기: hover 시에만
       const distance = hoverPointerElement
         ? (0.4 + Math.pow(Math.random(), 2) * 0.6) * 16
         : Math.pow(Math.random(), 2) * 16;
@@ -197,10 +205,10 @@ function enableGraffitiCursorEffect() {
       p.life -= p.decay;
       if (p.life <= 0) return false;
 
-      const hue = (Date.now() / 10 + index * 5) % 360;
+      const color = palette[index % palette.length];
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${hue}, 100%, 70%, ${p.alpha})`;
+      ctx.fillStyle = color;
       ctx.shadowBlur = 0;
       ctx.fill();
       return true;
