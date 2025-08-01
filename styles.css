@@ -217,8 +217,22 @@ section#title:after {
 
 aside.bottom_btn {
   left: initial;
+  top: initial;
+  position: fixed;
   right: 64px;
   bottom: 64px;
   width: auto;
   transform: none;
+}
+
+#header nav#gnb {
+  transform: translateY(-100%);
+  transition: 0.3s ease;
+}
+body {
+  padding: 0;
+  transition: 0.3s ease;
+}
+body.loaded {
+  padding: 70px;
 }
