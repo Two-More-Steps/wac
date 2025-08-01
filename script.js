@@ -124,3 +124,97 @@ window.addEventListener('load', updateBodyPadding);
 
 // 리사이즈 시에도 다시 계산
 window.addEventListener('resize', updateBodyPadding);
+
+
+function enableGraffitiCursorEffect() {
+  const canvas = document.createElement('canvas');
+  canvas.id = 'graffitiCanvas';
+  canvas.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+  `;
+  document.body.appendChild(canvas);
+
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  let mousePos = { x: 0, y: 0 };
+  let particles = [];
+  let lastTimestamp = 0;
+
+  const PARTICLE_LIFETIME = 0.1;
+  const PARTICLE_DECAY = 1.0 / (PARTICLE_LIFETIME * 60);
+  const PARTICLE_INTERVAL = 10;
+  const PARTICLE_COUNT = 60;
+
+  function setPosition(e) {
+    return {
+      x: e.clientX || (e.touches?.[0]?.clientX ?? 0),
+      y: e.clientY || (e.touches?.[0]?.clientY ?? 0)
+    };
+  }
+
+  function addParticles(pos) {
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const angle = Math.random() * 2 * Math.PI;
+      const distance = Math.pow(Math.random(), 2) * 16;
+      const offsetX = Math.cos(angle) * distance;
+      const offsetY = Math.sin(angle) * distance;
+
+      particles.push({
+        x: pos.x + offsetX,
+        y: pos.y + offsetY,
+        radius: Math.random() * 2,
+        alpha: 1.0,
+        life: 1.0,
+        decay: PARTICLE_DECAY
+      });
+    }
+  }
+
+  function paint() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles = particles.filter((p, index) => {
+      p.life -= p.decay;
+      if (p.life <= 0) return false;
+      const hue = (Date.now() / 10 + index * 5) % 360;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${hue}, 100%, 70%, ${p.alpha})`;
+      ctx.fill();
+      return true;
+    });
+    requestAnimationFrame(paint);
+  }
+
+  function update(timestamp) {
+    if (timestamp - lastTimestamp > PARTICLE_INTERVAL) {
+      addParticles(mousePos);
+      lastTimestamp = timestamp;
+    }
+    requestAnimationFrame(update);
+  }
+
+  function handleMouseMove(e) {
+    mousePos = setPosition(e);
+  }
+
+  window.addEventListener('mousemove', handleMouseMove);
+  window.addEventListener('touchmove', handleMouseMove);
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+
+  paint();
+  requestAnimationFrame(update);
+}
+
+
+enableGraffitiCursorEffect();
