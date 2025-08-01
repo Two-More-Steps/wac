@@ -142,7 +142,7 @@ function enableGraffitiCursorEffect() {
   `;
   document.body.appendChild(canvas);
 
-  document.body.style.cursor = 'none';
+  document.body.style.cursor = 'none'; // 커서 항상 숨김
 
   const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth;
@@ -155,8 +155,8 @@ function enableGraffitiCursorEffect() {
 
   const PARTICLE_LIFETIME = 0.15;
   const PARTICLE_DECAY = 1.0 / (PARTICLE_LIFETIME * 60);
-  const PARTICLE_INTERVAL = 10;
-  const PARTICLE_COUNT = 60;
+  const PARTICLE_INTERVAL = 12;
+  const PARTICLE_COUNT = 30;
 
   function setPosition(e) {
     return {
@@ -167,11 +167,16 @@ function enableGraffitiCursorEffect() {
 
   function addParticles(pos) {
     const scale = 1;
-    const count = hoverPointerElement ? PARTICLE_COUNT * 0.3 : PARTICLE_COUNT;
+    const count = hoverPointerElement ? PARTICLE_COUNT * 0.5 : PARTICLE_COUNT;
 
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * 2 * Math.PI;
-      const distance = (0.4 + Math.pow(Math.random(), 2) * 0.6) * 16; // 중심 피해서 퍼짐
+
+      // 중심 비움: hover일 때만
+      const distance = hoverPointerElement
+        ? (0.4 + Math.pow(Math.random(), 2) * 0.6) * 16
+        : Math.pow(Math.random(), 2) * 16;
+
       const offsetX = Math.cos(angle) * distance;
       const offsetY = Math.sin(angle) * distance;
 
@@ -231,4 +236,5 @@ function enableGraffitiCursorEffect() {
   paint();
   requestAnimationFrame(update);
 }
+
 enableGraffitiCursorEffect();
