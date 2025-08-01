@@ -203,9 +203,6 @@ section#title .text_wrap {
   top: 50%;
   transform: translate(-50%, -50%);
 }
-body {
-  padding-top: 70px;
-}
 section#title {
   aspect-ratio: 1920/420;
   height: auto;
@@ -234,7 +231,7 @@ body {
   transition: 0.3s ease;
 }
 body.loaded {
-  padding: 70px;
+  padding-top: 70px;
 }
 
 body.loaded #header nav#gnb {
