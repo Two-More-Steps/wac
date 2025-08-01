@@ -130,7 +130,7 @@ function enableGraffitiCursorEffect() {
   // ✅ 모바일 환경에서는 작동하지 않음
   if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return;
 
-  // ✅ 모든 요소 커서 숨김
+  // ✅ 모든 요소 커서 완전 숨김
   const style = document.createElement('style');
   style.innerHTML = `* { cursor: none !important; }`;
   document.head.appendChild(style);
@@ -163,7 +163,7 @@ function enableGraffitiCursorEffect() {
   const PARTICLE_INTERVAL = 12;
   const PARTICLE_COUNT = 30;
 
-  // 🎨 팝아트 스타일 팔레트
+  // 🎨 팝아트 색감 팔레트
   const palette = ['#FF0033', '#FFD700', '#0055FF', '#FF00AA', '#00CFFF', '#FFFFFF'];
 
   function setPosition(e) {
@@ -174,16 +174,19 @@ function enableGraffitiCursorEffect() {
   }
 
   function addParticles(pos) {
-    const scale = 1;
-    const count = hoverPointerElement ? PARTICLE_COUNT * 0.5 : PARTICLE_COUNT;
+    const isHover = hoverPointerElement;
+    const count = isHover ? PARTICLE_COUNT * 0.5 : PARTICLE_COUNT;
 
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * 2 * Math.PI;
 
-      // 중심 비우기: hover 시에만
-      const distance = hoverPointerElement
-        ? (0.4 + Math.pow(Math.random(), 2) * 0.6) * 16
-        : Math.pow(Math.random(), 2) * 16;
+      const distance = isHover
+        ? (1 + Math.random()) * 32        // 확 퍼지게 (32 ~ 64px)
+        : Math.pow(Math.random(), 2) * 16; // 기본 (0 ~ 16px)
+
+      const radius = isHover
+        ? (Math.random() * 2 + 2.5)       // 큼직하게 (2.5 ~ 4.5px)
+        : (Math.random() * 2 + 0.5);      // 기본 (0.5 ~ 2.5px)
 
       const offsetX = Math.cos(angle) * distance;
       const offsetY = Math.sin(angle) * distance;
@@ -191,7 +194,7 @@ function enableGraffitiCursorEffect() {
       particles.push({
         x: pos.x + offsetX,
         y: pos.y + offsetY,
-        radius: (Math.random() * 2 + 0.5) * scale,
+        radius: radius,
         alpha: 1.0,
         life: 1.0,
         decay: PARTICLE_DECAY
@@ -241,8 +244,10 @@ function enableGraffitiCursorEffect() {
     canvas.height = window.innerHeight;
   });
 
+  // ⏯️ 시작
   paint();
   requestAnimationFrame(update);
 }
+
 
 enableGraffitiCursorEffect();
