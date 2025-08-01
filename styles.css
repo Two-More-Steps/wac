@@ -232,6 +232,8 @@ body {
 }
 body.loaded {
   padding-top: 70px;
+  opacity: 1;
+  display: block;
 }
 
 body.loaded #header nav#gnb {
