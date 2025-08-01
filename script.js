@@ -127,6 +127,9 @@ window.addEventListener('resize', updateBodyPadding);
 
 
 function enableGraffitiCursorEffect() {
+  // 모바일 환경에서는 실행 안 함
+  if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return;
+
   const canvas = document.createElement('canvas');
   canvas.id = 'graffitiCanvas';
   canvas.style.cssText = `
@@ -140,6 +143,8 @@ function enableGraffitiCursorEffect() {
   `;
   document.body.appendChild(canvas);
 
+  document.body.style.cursor = 'none';
+
   const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -147,30 +152,33 @@ function enableGraffitiCursorEffect() {
   let mousePos = { x: 0, y: 0 };
   let particles = [];
   let lastTimestamp = 0;
+  let hoverPointerElement = false;
 
-  const PARTICLE_LIFETIME = 0.1;
+  const PARTICLE_LIFETIME = 0.15;
   const PARTICLE_DECAY = 1.0 / (PARTICLE_LIFETIME * 60);
   const PARTICLE_INTERVAL = 10;
   const PARTICLE_COUNT = 60;
 
   function setPosition(e) {
     return {
-      x: e.clientX || (e.touches?.[0]?.clientX ?? 0),
-      y: e.clientY || (e.touches?.[0]?.clientY ?? 0)
+      x: e.clientX || 0,
+      y: e.clientY || 0
     };
   }
 
   function addParticles(pos) {
+    const scale = hoverPointerElement ? 2 : 1;
+
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const angle = Math.random() * 2 * Math.PI;
-      const distance = Math.pow(Math.random(), 2) * 16;
+      const distance = Math.pow(Math.random(), 2) * 16 * scale;
       const offsetX = Math.cos(angle) * distance;
       const offsetY = Math.sin(angle) * distance;
 
       particles.push({
         x: pos.x + offsetX,
         y: pos.y + offsetY,
-        radius: Math.random() * 2,
+        radius: (Math.random() * 2 + 0.5) * scale,
         alpha: 1.0,
         life: 1.0,
         decay: PARTICLE_DECAY
@@ -183,11 +191,15 @@ function enableGraffitiCursorEffect() {
     particles = particles.filter((p, index) => {
       p.life -= p.decay;
       if (p.life <= 0) return false;
+
       const hue = (Date.now() / 10 + index * 5) % 360;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
       ctx.fillStyle = `hsla(${hue}, 100%, 70%, ${p.alpha})`;
+      ctx.shadowBlur = 10 * p.radius;
+      ctx.shadowColor = `hsla(${hue}, 100%, 70%, ${p.alpha})`;
       ctx.fill();
+      ctx.shadowBlur = 0;
       return true;
     });
     requestAnimationFrame(paint);
@@ -203,10 +215,16 @@ function enableGraffitiCursorEffect() {
 
   function handleMouseMove(e) {
     mousePos = setPosition(e);
+
+    const el = document.elementFromPoint(mousePos.x, mousePos.y);
+    const pointerLike =
+      getComputedStyle(el).cursor === 'pointer' ||
+      el.closest('a, button, [role="button"]');
+
+    hoverPointerElement = !!pointerLike;
   }
 
   window.addEventListener('mousemove', handleMouseMove);
-  window.addEventListener('touchmove', handleMouseMove);
   window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -215,6 +233,4 @@ function enableGraffitiCursorEffect() {
   paint();
   requestAnimationFrame(update);
 }
-
-
 enableGraffitiCursorEffect();
