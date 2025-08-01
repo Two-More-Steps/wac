@@ -2,7 +2,9 @@ section#intro:after,
 section#intro article {
   display: none;
 }
-
+section .row {
+  color: #fff;
+}
 section#intro {
   height: auto;
   border-bottom: 1px solid #010b13;
@@ -252,4 +254,12 @@ section {
   .tms-floatingbar-container2 {
     transform: rotate(2.4deg) translateY(60%) scale(1.1);
   }
+}
+
+table.curriculum_table tr td:last-child,
+.col_box .column .col_last p {
+  color: #ababab;
+}
+section .wrap > table tr td:first-child {
+  color: #fff;
 }
