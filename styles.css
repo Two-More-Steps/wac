@@ -214,3 +214,11 @@ section#title {
 section#title:after {
   background: rgba(0, 0, 0, 0.48);
 }
+
+aside.bottom_btn {
+  left: initial;
+  right: 64px;
+  bottom: 64px;
+  width: auto;
+  transform: none;
+}
