@@ -338,6 +338,9 @@ color: #fff;
 section#news_col .column .text > span{
 color: #8f8f8f;
 }
+.row.detail .wrap .inner.detail .column .contents{
+  background-color: #fff;
+}
 
 @media screen and (max-width: 1200px) {
 section#about_us .inner table.curriculum_table td {
